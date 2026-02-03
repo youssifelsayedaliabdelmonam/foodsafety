@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "877569395406",
+    "project_id": "foodcheck-8023b",
+    "storage_bucket": "foodcheck-8023b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877569395406:android:620a6a0d2f546612319e9f",
+        "android_client_info": {
+          "package_name": "com.example.new_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "877569395406-q9qu3oe47nmnk9dov7i891ntj0h15a34.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP7PRRnRgg4p4iryWlR_FTvQjVWl_QpKQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "877569395406-q9qu3oe47nmnk9dov7i891ntj0h15a34.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
