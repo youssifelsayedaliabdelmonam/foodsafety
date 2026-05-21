@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
+import '../generated/app_localizations.dart';
 import 'result_screen.dart';
 
 class IngredientScreen
@@ -53,6 +54,10 @@ class _IngredientScreenState
   }
 
   void _validateAndNavigate() {
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
     Map<
       String,
       double
@@ -73,7 +78,9 @@ class _IngredientScreenState
         hasErrors =
             true;
         _showError(
-          'يرجى إدخال قيمة لـ ${rule.type}',
+          l10n.enterValueFor(
+            rule.type,
+          ),
         );
         _focusNodes[rule.type]?.requestFocus();
         break;
@@ -87,7 +94,9 @@ class _IngredientScreenState
         hasErrors =
             true;
         _showError(
-          'القيمة المدخلة لـ ${rule.type} غير صالحة',
+          l10n.invalidValueFor(
+            rule.type,
+          ),
         );
         _focusNodes[rule.type]?.requestFocus();
         break;
@@ -146,6 +155,11 @@ class _IngredientScreenState
   Widget build(
     BuildContext context,
   ) {
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
+
     return Scaffold(
       backgroundColor: Color(
         0xFFF8FAFC,
@@ -344,7 +358,7 @@ class _IngredientScreenState
                       ),
                       Expanded(
                         child: Text(
-                          'أدخل القيم الغذائية للحصول على تحليل مفصل',
+                          l10n.enterNutritionalValues,
                           style: TextStyle(
                             fontSize:
                                 15,
@@ -373,7 +387,7 @@ class _IngredientScreenState
                     CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'القيم الغذائية',
+                    l10n.nutritionalValues,
                     style: TextStyle(
                       fontSize:
                           20,
@@ -389,7 +403,7 @@ class _IngredientScreenState
                         6,
                   ),
                   Text(
-                    'أدخل القيم المقاسة بالمقياس المناسب',
+                    l10n.enterMeasuredValues,
                     style: TextStyle(
                       fontSize:
                           15,
@@ -398,7 +412,6 @@ class _IngredientScreenState
                       ),
                     ),
                   ),
-
                   SizedBox(
                     height:
                         28,
@@ -463,12 +476,10 @@ class _IngredientScreenState
                                 ),
                               ],
                             ),
-
                             SizedBox(
                               height:
                                   12,
                             ),
-
                             TextField(
                               controller:
                                   _controllers[rule.type],
@@ -482,7 +493,7 @@ class _IngredientScreenState
                               ),
                               decoration: InputDecoration(
                                 hintText:
-                                    'أدخل القيمة...',
+                                    l10n.enterValue,
                                 prefixIcon: Icon(
                                   Icons.edit,
                                   color: Color(
@@ -506,12 +517,10 @@ class _IngredientScreenState
                                 ),
                               ),
                             ),
-
                             SizedBox(
                               height:
                                   12,
                             ),
-
                             Container(
                               padding: EdgeInsets.all(
                                 16,
@@ -545,7 +554,11 @@ class _IngredientScreenState
                                   ),
                                   Expanded(
                                     child: Text(
-                                      'النطاق الصحي: ${rule.minValue} - ${rule.maxValue} ${rule.unit}',
+                                      l10n.healthyRange(
+                                        rule.minValue.toString(),
+                                        rule.maxValue.toString(),
+                                        rule.unit,
+                                      ),
                                       style: TextStyle(
                                         fontSize:
                                             14,
@@ -604,7 +617,7 @@ class _IngredientScreenState
                                     12,
                               ),
                               Text(
-                                'تحليل النسب',
+                                l10n.analyzeRatios,
                                 style: TextStyle(
                                   fontSize:
                                       16,
@@ -616,12 +629,10 @@ class _IngredientScreenState
                           ),
                         ),
                       ),
-
                       SizedBox(
                         height:
                             20,
                       ),
-
                       SizedBox(
                         width:
                             double.infinity,
@@ -650,7 +661,7 @@ class _IngredientScreenState
                             ),
                           ),
                           child: Text(
-                            'إعادة تعيين',
+                            l10n.reset,
                             style: TextStyle(
                               fontSize:
                                   15,

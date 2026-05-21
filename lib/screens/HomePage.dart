@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../models/ingredient.dart';
 import '../data/ingredients_data.dart';
 import '../widgets/ingredient_card.dart';
 import '../widgets/themes_toggel.dart';
-import '../providers/themes_provider.dart';
 import 'ingredient_screen.dart';
+import 'AdminUsersScreen.dart';
 
 class HomeScreen
     extends
         StatefulWidget {
+  final Map<
+    String,
+    dynamic
+  >
+  currentUser; // ✅ اليوزر الحالي
+
   const HomeScreen({
     Key? key,
+    required this.currentUser,
   }) : super(
          key:
              key,
@@ -30,27 +37,20 @@ class _HomeScreenState
         State<
           HomeScreen
         > {
-  String _selectedCategory =
-      'الكل';
-  final List<
-    String
-  >
-  _categories = [
-    'الكل',
-    'الألبان',
-    'اللحوم',
-    'الخضروات',
-    'الفواكه',
-    'المشروبات',
-    'الحبوب',
-  ];
+  int _selectedCategoryIndex =
+      0;
 
   List<
     Ingredient
   >
-  _getFilteredIngredients() {
-    if (_selectedCategory ==
-        'الكل') {
+  _getFilteredIngredients(
+    List<
+      String
+    >
+    categories,
+  ) {
+    if (_selectedCategoryIndex ==
+        0) {
       return IngredientsData.ingredients;
     }
     return IngredientsData.ingredients
@@ -59,7 +59,7 @@ class _HomeScreenState
             ingredient,
           ) =>
               ingredient.category ==
-              _selectedCategory,
+              categories[_selectedCategoryIndex],
         )
         .toList();
   }
@@ -68,8 +68,27 @@ class _HomeScreenState
   Widget build(
     BuildContext context,
   ) {
-    final filteredIngredients =
-        _getFilteredIngredients();
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
+    final isAdmin =
+        widget.currentUser['isAdmin'] ==
+        true;
+
+    final categories = [
+      l10n.catAll,
+      l10n.catDairy,
+      l10n.catMeat,
+      l10n.catVegetables,
+      l10n.catFruits,
+      l10n.catBeverages,
+      l10n.catGrains,
+    ];
+
+    final filteredIngredients = _getFilteredIngredients(
+      categories,
+    );
     final screenWidth =
         MediaQuery.of(
           context,
@@ -78,7 +97,6 @@ class _HomeScreenState
         MediaQuery.of(
           context,
         ).size.height;
-
     final theme = Theme.of(
       context,
     );
@@ -156,7 +174,7 @@ class _HomeScreenState
                   ),
                   Flexible(
                     child: Text(
-                      'Nutrition Check',
+                      l10n.homeTitle,
                       style:
                           theme.appBarTheme.titleTextStyle,
                       overflow:
@@ -200,8 +218,30 @@ class _HomeScreenState
                 ),
               ),
             ),
-
             actions: [
+              // ✅ زرار الأدمين
+              if (isAdmin)
+                IconButton(
+                  icon: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color:
+                        Colors.white,
+                  ),
+                  tooltip:
+                      'Manage Users',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (
+                              _,
+                            ) =>
+                                const AdminUsersScreen(),
+                      ),
+                    );
+                  },
+                ),
               const ThemeToggleButton(),
               const SizedBox(
                 width:
@@ -345,16 +385,17 @@ class _HomeScreenState
                                   width:
                                       12,
                                 ),
-                                const Flexible(
+                                Flexible(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     mainAxisSize:
                                         MainAxisSize.min,
                                     children: [
+                                      // ✅ بيعرض اسم اليوزر
                                       Text(
-                                        'مرحباً بك 👋',
-                                        style: TextStyle(
+                                        '${l10n.homeWelcome}, ${widget.currentUser['name']}!',
+                                        style: const TextStyle(
                                           fontSize:
                                               18,
                                           fontWeight:
@@ -363,13 +404,13 @@ class _HomeScreenState
                                               Colors.white,
                                         ),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height:
                                             2,
                                       ),
                                       Text(
-                                        'افحص سلامة المكونات الغذائية بسهولة',
-                                        style: TextStyle(
+                                        l10n.homeSubtitle,
+                                        style: const TextStyle(
                                           fontSize:
                                               12,
                                           color:
@@ -438,10 +479,10 @@ class _HomeScreenState
                                     width:
                                         10,
                                   ),
-                                  const Flexible(
+                                  Flexible(
                                     child: Text(
-                                      'اختر مكوناً وأدخل القيم للحصول على تحليل مفصل',
-                                      style: TextStyle(
+                                      l10n.homeTip,
+                                      style: const TextStyle(
                                         fontSize:
                                             11,
                                         color:
@@ -483,7 +524,7 @@ class _HomeScreenState
                     children: [
                       Expanded(
                         child: Text(
-                          'التصنيفات',
+                          l10n.categories,
                           style:
                               theme.textTheme.headlineLarge,
                           overflow:
@@ -528,7 +569,7 @@ class _HomeScreenState
                                   4,
                             ),
                             Text(
-                              '${_categories.length} فئات',
+                              '${categories.length} ${l10n.categoriesCount}',
                               style: const TextStyle(
                                 fontSize:
                                     11,
@@ -539,7 +580,7 @@ class _HomeScreenState
                                   2,
                                   151,
                                   106,
-                                ), // تم استبدال theme.colorScheme.primary إذا لزم
+                                ),
                               ),
                             ),
                           ],
@@ -554,7 +595,7 @@ class _HomeScreenState
                       12,
                 ),
 
-                // Categories List (بدون تغيير)
+                // Categories List
                 SizedBox(
                   height:
                       42,
@@ -567,7 +608,7 @@ class _HomeScreenState
                     scrollDirection:
                         Axis.horizontal,
                     itemCount:
-                        _categories.length,
+                        categories.length,
                     separatorBuilder:
                         (
                           context,
@@ -581,17 +622,16 @@ class _HomeScreenState
                       index,
                     ) {
                       final category =
-                          _categories[index];
+                          categories[index];
                       final isSelected =
-                          _selectedCategory ==
-                          category;
+                          _selectedCategoryIndex ==
+                          index;
                       return GestureDetector(
                         onTap: () {
                           setState(
-                            () {
-                              _selectedCategory =
-                                  category;
-                            },
+                            () =>
+                                _selectedCategoryIndex =
+                                    index,
                           );
                         },
                         child: AnimatedContainer(
@@ -715,7 +755,7 @@ class _HomeScreenState
                     children: [
                       Expanded(
                         child: Text(
-                          'المكونات الغذائية',
+                          l10n.ingredients,
                           style:
                               theme.textTheme.headlineLarge,
                           overflow:
@@ -760,7 +800,7 @@ class _HomeScreenState
                                   4,
                             ),
                             Text(
-                              '${filteredIngredients.length} عنصر',
+                              '${filteredIngredients.length} ${l10n.itemsCount}',
                               style: const TextStyle(
                                 fontSize:
                                     11,
@@ -880,7 +920,7 @@ class _HomeScreenState
                               16,
                         ),
                         Text(
-                          'لا توجد مكونات في هذا التصنيف',
+                          l10n.noIngredients,
                           style:
                               theme.textTheme.bodyLarge,
                           textAlign:
@@ -891,7 +931,7 @@ class _HomeScreenState
                               6,
                         ),
                         Text(
-                          'جرب تصنيفاً آخر للعثور على المزيد',
+                          l10n.tryAnother,
                           style:
                               theme.textTheme.bodyMedium,
                           textAlign:
@@ -938,9 +978,9 @@ class _HomeScreenState
             size:
                 20,
           ),
-          label: const Text(
-            'إضافة مكون',
-            style: TextStyle(
+          label: Text(
+            l10n.addIngredient,
+            style: const TextStyle(
               fontSize:
                   13,
               fontWeight:

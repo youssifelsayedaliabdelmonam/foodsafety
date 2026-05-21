@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 import '../widgets/result_card.dart';
+import '../generated/app_localizations.dart';
 
 class ResultScreen
     extends
@@ -35,6 +36,11 @@ class ResultScreen
   Widget build(
     BuildContext context,
   ) {
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
+
     int validCount =
         0;
     List<
@@ -55,7 +61,6 @@ class ResultScreen
         value,
       );
       if (isValid) validCount++;
-
       results.add(
         {
           'rule':
@@ -90,25 +95,25 @@ class ResultScreen
     String healthStatus =
         healthPercentage >=
                 80
-            ? 'صحي وآمن'
+            ? l10n.healthyStatus
             : healthPercentage >=
                 50
-            ? 'مقبول'
-            : 'غير صحي';
+            ? l10n.acceptableStatus
+            : l10n.unhealthyStatus;
 
     String healthMessage =
         healthPercentage >=
                 80
-            ? 'جميع النسب ضمن المدى الصحي الموصى به'
+            ? l10n.healthyMessage
             : healthPercentage >=
                 50
-            ? 'بعض النسب خارج المدى المثالي'
-            : 'يحتاج لمراجعة طبية فورية';
+            ? l10n.acceptableMessage
+            : l10n.unhealthyMessage;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'نتائج الفحص',
+          l10n.checkResults,
           style: TextStyle(
             fontSize:
                 17,
@@ -212,7 +217,7 @@ class ResultScreen
                                     4,
                               ),
                               Text(
-                                'نسبة الصحة',
+                                l10n.healthRatio,
                                 style: TextStyle(
                                   fontSize:
                                       13,
@@ -229,12 +234,10 @@ class ResultScreen
                       ),
                     ],
                   ),
-
                   SizedBox(
                     height:
                         24,
                   ),
-
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal:
@@ -285,12 +288,10 @@ class ResultScreen
                       ],
                     ),
                   ),
-
                   SizedBox(
                     height:
                         16,
                   ),
-
                   Text(
                     healthMessage,
                     textAlign:
@@ -305,12 +306,10 @@ class ResultScreen
                           1.6,
                     ),
                   ),
-
                   SizedBox(
                     height:
                         24,
                   ),
-
                   Container(
                     padding: EdgeInsets.all(
                       20,
@@ -329,7 +328,7 @@ class ResultScreen
                       children: [
                         _buildStatItem(
                           validCount.toString(),
-                          'صحي',
+                          l10n.healthyStat,
                           Color(
                             0xFF10B981,
                           ),
@@ -347,7 +346,7 @@ class ResultScreen
                           (ingredient.rules.length -
                                   validCount)
                               .toString(),
-                          'غير صحي',
+                          l10n.unhealthyStat,
                           Color(
                             0xFFEF4444,
                           ),
@@ -363,7 +362,7 @@ class ResultScreen
                         ),
                         _buildStatItem(
                           ingredient.rules.length.toString(),
-                          'إجمالي',
+                          l10n.totalStat,
                           Color(
                             0xFF64748B,
                           ),
@@ -401,7 +400,7 @@ class ResultScreen
                       12,
                 ),
                 Text(
-                  'تفاصيل النتائج',
+                  l10n.resultDetails,
                   style: TextStyle(
                     fontSize:
                         18,
@@ -420,7 +419,7 @@ class ResultScreen
                   8,
             ),
             Text(
-              'نتائج فحص كل عنصر غذائي على حدة',
+              l10n.resultSubtitle,
               style: TextStyle(
                 fontSize:
                     14,
@@ -429,7 +428,6 @@ class ResultScreen
                 ),
               ),
             ),
-
             SizedBox(
               height:
                   20,
@@ -469,17 +467,16 @@ class ResultScreen
                   40,
             ),
 
-            Container(
+            SizedBox(
               width:
                   double.infinity,
               height:
                   56,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                  );
-                },
+                onPressed:
+                    () => Navigator.pop(
+                      context,
+                    ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Colors.white,
@@ -502,7 +499,7 @@ class ResultScreen
                       0,
                 ),
                 child: Text(
-                  'فحص مكون آخر',
+                  l10n.checkAnotherIngredient,
                   style: TextStyle(
                     fontSize:
                         16,

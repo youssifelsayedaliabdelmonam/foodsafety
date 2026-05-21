@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../screens/HomePage.dart';
+import '../generated/app_localizations.dart';
+import '../data/users_data.dart';
 import 'widgets/themes_toggel.dart';
 
 class LoginPage
@@ -31,8 +32,6 @@ class _LoginPageState
       TextEditingController();
   final _passwordController =
       TextEditingController();
-  final _auth =
-      FirebaseAuth.instance;
 
   bool _obscurePassword =
       true;
@@ -51,9 +50,7 @@ class _LoginPageState
     void
   >
   _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(
       () {
@@ -64,175 +61,56 @@ class _LoginPageState
       },
     );
 
-    try {
-      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email:
-            _emailController.text.trim(),
-        password:
-            _passwordController.text.trim(),
-      );
-
-      if (userCredential.user !=
-              null &&
-          mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (
-                  context,
-                ) =>
-                    const HomeScreen(),
-          ),
-        );
-      }
-    } on FirebaseAuthException catch (
-      e
-    ) {
-      setState(
-        () {
-          switch (e.code) {
-            case 'user-not-found':
-              _errorMessage =
-                  'Email not registered';
-              break;
-            case 'wrong-password':
-              _errorMessage =
-                  'Incorrect password';
-              break;
-            case 'invalid-email':
-              _errorMessage =
-                  'Invalid email';
-              break;
-            case 'user-disabled':
-              _errorMessage =
-                  'This account is disabled';
-              break;
-            case 'too-many-requests':
-              _errorMessage =
-                  'Too many attempts, try later';
-              break;
-            default:
-              _errorMessage =
-                  'Error: ${e.message}';
-          }
-        },
-      );
-    } catch (
-      e
-    ) {
-      setState(
-        () {
-          _errorMessage =
-              'An unexpected error occurred';
-        },
-      );
-    } finally {
-      setState(
-        () {
-          _isLoading =
-              false;
-        },
-      );
-    }
-  }
-
-  Future<
-    void
-  >
-  _handleSignUp() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(
-      () {
-        _isLoading =
-            true;
-        _errorMessage =
-            null;
-      },
+    await Future.delayed(
+      const Duration(
+        milliseconds:
+            500,
+      ),
     );
 
-    try {
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email:
-            _emailController.text.trim(),
-        password:
-            _passwordController.text.trim(),
-      );
+    // ✅ شيك على اليوزرات الثابتة
+    final user = UsersData.login(
+      _emailController.text,
+      _passwordController.text,
+    );
 
-      if (userCredential.user !=
-              null &&
-          mounted) {
-        await userCredential.user!.sendEmailVerification();
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Account created! Check your email',
-            ),
-            backgroundColor:
-                Theme.of(
-                  context,
-                ).colorScheme.primary,
-          ),
-        );
-
+    if (mounted) {
+      if (user !=
+          null) {
+        // ✅ اليوزر موجود — بعت الـ currentUser للـ HomeScreen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder:
                 (
-                  context,
-                ) =>
-                    const HomeScreen(),
+                  _,
+                ) => HomeScreen(
+                  currentUser:
+                      user,
+                ),
           ),
         );
+      } else {
+        // ❌ الإيميل أو الباسورد غلط
+        setState(
+          () {
+            _errorMessage =
+                AppLocalizations.of(
+                  context,
+                )!.invalidCredentials;
+            _isLoading =
+                false;
+          },
+        );
       }
-    } on FirebaseAuthException catch (
-      e
-    ) {
-      setState(
-        () {
-          switch (e.code) {
-            case 'weak-password':
-              _errorMessage =
-                  'Password is too weak';
-              break;
-            case 'email-already-in-use':
-              _errorMessage =
-                  'Email already in use';
-              break;
-            case 'invalid-email':
-              _errorMessage =
-                  'Invalid email';
-              break;
-            default:
-              _errorMessage =
-                  'Error: ${e.message}';
-          }
-        },
-      );
-    } catch (
-      e
-    ) {
-      setState(
-        () {
-          _errorMessage =
-              'An unexpected error occurred';
-        },
-      );
-    } finally {
-      setState(
-        () {
-          _isLoading =
-              false;
-        },
-      );
     }
+
+    if (mounted)
+      setState(
+        () =>
+            _isLoading =
+                false,
+      );
   }
 
   Future<
@@ -241,14 +119,18 @@ class _LoginPageState
   _handleResetPassword() async {
     final email =
         _emailController.text.trim();
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please enter your email first',
+            l10n.enterEmailFirst,
           ),
           backgroundColor:
               Colors.orange,
@@ -257,51 +139,20 @@ class _LoginPageState
       return;
     }
 
-    try {
-      await _auth.sendPasswordResetEmail(
-        email:
-            email,
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.resetLinkSent,
+          ),
+          backgroundColor:
+              Theme.of(
+                context,
+              ).colorScheme.primary,
+        ),
       );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Password reset link sent to your email',
-            ),
-            backgroundColor:
-                Theme.of(
-                  context,
-                ).colorScheme.primary,
-          ),
-        );
-      }
-    } on FirebaseAuthException catch (
-      e
-    ) {
-      String message =
-          'An error occurred';
-      if (e.code ==
-          'user-not-found') {
-        message =
-            'Email not registered';
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: Text(
-              message,
-            ),
-            backgroundColor:
-                Theme.of(
-                  context,
-                ).colorScheme.error,
-          ),
-        );
-      }
     }
   }
 
@@ -309,7 +160,10 @@ class _LoginPageState
   Widget build(
     BuildContext context,
   ) {
-    // ✅ استخدام Theme بدل الألوان الثابتة
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!;
     final theme = Theme.of(
       context,
     );
@@ -317,8 +171,6 @@ class _LoginPageState
         theme.brightness ==
         Brightness.dark;
 
-    final primaryColor =
-        theme.colorScheme.primary;
     final backgroundColor =
         isDark
             ? const Color(
@@ -379,7 +231,7 @@ class _LoginPageState
                         20,
                   ),
 
-                  // Header with curved background
+                  // Header
                   Container(
                     width:
                         double.infinity,
@@ -399,7 +251,7 @@ class _LoginPageState
                               20,
                         ),
                         Text(
-                          'Welcome!',
+                          l10n.welcome,
                           style: TextStyle(
                             fontSize:
                                 32,
@@ -425,7 +277,7 @@ class _LoginPageState
                               8,
                         ),
                         Text(
-                          'Login',
+                          l10n.login,
                           style: TextStyle(
                             fontSize:
                                 24,
@@ -447,7 +299,6 @@ class _LoginPageState
                               30,
                         ),
 
-                        // Illustration - مبسط وبيشتغل مع الثيمات
                         Center(
                           child: Stack(
                             alignment:
@@ -455,7 +306,6 @@ class _LoginPageState
                             clipBehavior:
                                 Clip.none,
                             children: [
-                              // الشاشة في المنتصف
                               Container(
                                 width:
                                     120,
@@ -489,7 +339,6 @@ class _LoginPageState
                                     mainAxisAlignment:
                                         MainAxisAlignment.center,
                                     children: [
-                                      // أيقونة المستخدم
                                       Container(
                                         width:
                                             50,
@@ -526,7 +375,6 @@ class _LoginPageState
                                         height:
                                             15,
                                       ),
-                                      // خطوط تمثل النص
                                       Container(
                                         width:
                                             60,
@@ -563,8 +411,6 @@ class _LoginPageState
                                   ),
                                 ),
                               ),
-
-                              // دوائر ديكور
                               Positioned(
                                 left:
                                     -10,
@@ -584,7 +430,6 @@ class _LoginPageState
                                   ),
                                 ),
                               ),
-
                               Positioned(
                                 right:
                                     -10,
@@ -674,7 +519,7 @@ class _LoginPageState
                     controller:
                         _emailController,
                     label:
-                        'Email',
+                        l10n.email,
                     icon:
                         Icons.email_outlined,
                     keyboardType:
@@ -693,13 +538,12 @@ class _LoginPageState
                       if (value ==
                               null ||
                           value.isEmpty) {
-                        return 'Please enter your email';
+                        return l10n.enterEmail;
                       }
                       if (!value.contains(
                         '@',
-                      )) {
-                        return 'Invalid email';
-                      }
+                      ))
+                        return l10n.invalidEmail;
                       return null;
                     },
                   ),
@@ -715,7 +559,7 @@ class _LoginPageState
                     controller:
                         _passwordController,
                     label:
-                        'Password',
+                        l10n.password,
                     icon:
                         Icons.lock_outline,
                     obscureText:
@@ -738,10 +582,9 @@ class _LoginPageState
                       ),
                       onPressed: () {
                         setState(
-                          () {
-                            _obscurePassword =
-                                !_obscurePassword;
-                          },
+                          () =>
+                              _obscurePassword =
+                                  !_obscurePassword,
                         );
                       },
                     ),
@@ -751,12 +594,11 @@ class _LoginPageState
                       if (value ==
                               null ||
                           value.isEmpty) {
-                        return 'Please enter your password';
+                        return l10n.enterPassword;
                       }
                       if (value.length <
-                          6) {
-                        return 'Password must be at least 6 characters';
-                      }
+                          6)
+                        return l10n.passwordLength;
                       return null;
                     },
                   ),
@@ -773,7 +615,7 @@ class _LoginPageState
                       onPressed:
                           _handleResetPassword,
                       child: Text(
-                        'Forget Password?',
+                        l10n.forgetPassword,
                         style: TextStyle(
                           color:
                               secondaryTextColor,
@@ -829,9 +671,9 @@ class _LoginPageState
                                   ),
                                 ),
                               )
-                              : const Text(
-                                'Login',
-                                style: TextStyle(
+                              : Text(
+                                l10n.login,
+                                style: const TextStyle(
                                   fontSize:
                                       18,
                                   fontWeight:
@@ -839,44 +681,6 @@ class _LoginPageState
                                 ),
                               ),
                     ),
-                  ),
-                  const SizedBox(
-                    height:
-                        20,
-                  ),
-
-                  // Sign up
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't Have Account? ",
-                        style: TextStyle(
-                          color:
-                              secondaryTextColor,
-                          fontSize:
-                              14,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed:
-                            _isLoading
-                                ? null
-                                : _handleSignUp,
-                        child: Text(
-                          'Signup',
-                          style: TextStyle(
-                            color:
-                                textColor,
-                            fontSize:
-                                14,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                   const SizedBox(
                     height:
